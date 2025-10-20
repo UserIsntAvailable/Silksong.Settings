@@ -1,26 +1,38 @@
+using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
 
 namespace Settings;
 
 [BepInAutoPlugin(id: "unavailable.settings")]
-public partial class Plugin : BaseUnityPlugin
+public partial class Plugin : BaseUnityPlugin, IProfileSettings<Settings>
 {
-    static Harmony _harmony = null!;
+    Harmony _harmony = null!;
+
+    internal static Plugin Instance = null!;
+    // TODO(Unavailable): This doesn't need to be a `Dictionary` anymore.
+    internal Dictionary<string, ModSettings> Settings = new();
 
     void Awake()
     {
         Log.Debug("Mod loaded");
 
+        Instance = this;
         _harmony = new Harmony(Plugin.Id);
-        _harmony.PatchAll(typeof(Patch));
+        _harmony.PatchAll(typeof(Patches));
     }
 
-    void OnDestroy()
+    void Start()
     {
-        _harmony.UnpatchSelf();
-        Log.Debug("Mod unloaded");
+        Settings = Discovery.FindModSettings();
+        Log.Debug($"{Settings.Keys.Count} discovered settings");
     }
+
+    // TODO(Unavailable): This should be `ISharedSettings`
+    public Settings ProfileSettings { get; set; } = new();
 }
 
-class Patch { }
+public record Settings
+{
+    public string UserDataPath { get; set; } = Paths.DefaultUserDataPath;
+}
