@@ -31,7 +31,7 @@ record ReflectionMethod
 {
     // PERF(Unavailable): Use something akin to monomod's `FastReflectionDelegate`
     // (on `reorg` this is called `FastInvoker`).
-    MethodInfo Info { get; init; }
+    MethodInfo Info { get; }
 
     ReflectionMethod(MethodInfo info)
     {

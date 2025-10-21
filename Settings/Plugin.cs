@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
+using JetBrains.Annotations;
 
 namespace Silksong.Settings;
 
@@ -35,5 +36,6 @@ public partial class Plugin : BaseUnityPlugin, IProfileSettings<Settings>
 
 public record Settings
 {
+    [PublicAPI]
     public string DataFolderPath { get; set; } = Paths.DefaultDataFolderPath;
 }

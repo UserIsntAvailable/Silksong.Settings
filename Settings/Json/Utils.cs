@@ -6,7 +6,7 @@ namespace Silksong.Settings.Json;
 
 static class Utils
 {
-    static JsonSerializerSettings _settings = new()
+    static readonly JsonSerializerSettings _settings = new()
     {
         ContractResolver = ShouldSerializeContractResolver.Instance,
         TypeNameHandling = TypeNameHandling.Auto,

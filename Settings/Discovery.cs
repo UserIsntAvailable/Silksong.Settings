@@ -51,7 +51,7 @@ internal static class Discovery
         return settings;
     }
 
-    internal static SettingsInvoker? ImplementsSettings(
+    static SettingsInvoker? ImplementsSettings(
         Type[] interfaces,
         Type settingsType,
         string onLoadMethod,
@@ -63,7 +63,7 @@ internal static class Discovery
             interfaces.FirstOrDefault(x =>
                 x.IsGenericType && x.GetGenericTypeDefinition() == settingsType
             )
-            is Type iSettings
+            is { } iSettings
         )
         {
             invoker = new(

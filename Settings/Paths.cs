@@ -9,13 +9,14 @@ public static class Paths
 
     // DOCS(Unavailable): Can be null if: 1) gets called inside `Awake()` or
     // 2) dev didn't set `Silksong.Settings` as one of their dependencies, and
-    // their `Start()` method rans first that ours.
+    // their `Start()` method ran first that ours.
     public static string? SharedFolderPath
     {
         get
         {
+            // TODO(Unavailable): Wouldn't it be better to `throw`?
             if (!Plugin.Instance.didStart) return null;
-            return field = field is null ? SharedPathFolder() : field;
+            return field ??= SharedPathFolder();
         }
     }
 

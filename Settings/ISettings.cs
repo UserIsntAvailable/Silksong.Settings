@@ -1,6 +1,6 @@
 namespace Silksong.Settings;
 
-// TODO(Unavailable): type erased interfaces
+// TODO(Unavailable): type erased interfaces?
 
 public interface IProfileSettings<T>
 {

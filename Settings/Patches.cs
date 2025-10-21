@@ -6,7 +6,7 @@ using Silksong.Settings.Json;
 
 namespace Silksong.Settings;
 
-class Patches
+static class Patches
 {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(UIManager), nameof(UIManager.Start))]
@@ -18,9 +18,9 @@ class Patches
         {
             var plugin = modSettings.Plugin;
 
-            if (modSettings.ProfileSettingsInvoker is SettingsInvoker profileInvoker)
+            if (modSettings.ProfileSettingsInvoker is { } profileInvoker)
                 InvokePluginLoad(modSettings.ProfileSettingsPath, plugin, profileInvoker);
-            if (modSettings.SharedSettingsInvoker is SettingsInvoker sharedInvoker)
+            if (modSettings.SharedSettingsInvoker is { } sharedInvoker)
                 InvokePluginLoad(modSettings.SharedSettingsPath, plugin, sharedInvoker);
         }
     }
@@ -37,9 +37,9 @@ class Patches
         {
             var plugin = modSettings.Plugin;
 
-            if (modSettings.ProfileSettingsInvoker is SettingsInvoker profileInvoker)
+            if (modSettings.ProfileSettingsInvoker is { } profileInvoker)
                 InvokePluginSave(modSettings.ProfileSettingsPath, plugin, profileInvoker);
-            if (modSettings.SharedSettingsInvoker is SettingsInvoker sharedInvoker)
+            if (modSettings.SharedSettingsInvoker is { } sharedInvoker)
                 InvokePluginSave(modSettings.SharedSettingsPath, plugin, sharedInvoker);
         }
     }
@@ -48,11 +48,10 @@ class Patches
     {
         try
         {
-            object? obj = null;
             var settingsType = invoker.SettingsType;
 
             if (!File.Exists(path)) return;
-            if (Utils.TryLoadJson(path, settingsType, out obj))
+            if (Utils.TryLoadJson(path, settingsType, out var obj))
             {
                 invoker.OnSettingsLoad.Invoke(plugin, obj);
                 return;
@@ -70,7 +69,7 @@ class Patches
                 return;
             }
 
-            Log.Error($"Failed to load settings from backup");
+            Log.Error("Failed to load settings from backup");
         }
         catch (Exception e)
         {
@@ -91,7 +90,7 @@ class Patches
 
             if (Utils.TrySaveJson(path, obj)) return;
 
-            Log.Error($"Failed to save settings");
+            Log.Error("Failed to save settings");
         }
         catch (Exception e)
         {
