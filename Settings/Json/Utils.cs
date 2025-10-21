@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace Settings.Json;
+namespace Silksong.Settings.Json;
 
 static class Utils
 {

@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using BepInEx;
 using HarmonyLib;
-using Settings.Json;
+using Silksong.Settings.Json;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 class Patches
 {

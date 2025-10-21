@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 [BepInAutoPlugin(id: "unavailable.settings")]
 public partial class Plugin : BaseUnityPlugin, IProfileSettings<Settings>

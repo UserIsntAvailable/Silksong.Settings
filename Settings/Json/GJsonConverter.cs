@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 /// <inheritdoc />
 public abstract class JsonConverter<TClass> : JsonConverter

@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 /// <inheritdoc />
 public class Vector2Converter : JsonConverter<Vector2>

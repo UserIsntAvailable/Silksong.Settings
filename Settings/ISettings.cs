@@ -1,4 +1,4 @@
-namespace Settings;
+namespace Silksong.Settings;
 
 // TODO(Unavailable): type erased interfaces
 

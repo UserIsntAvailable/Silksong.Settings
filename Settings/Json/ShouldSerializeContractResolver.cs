@@ -26,7 +26,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 /// <inheritdoc />
 public class ShouldSerializeContractResolver : DefaultContractResolver

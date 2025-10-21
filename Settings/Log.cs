@@ -1,6 +1,6 @@
 using System;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 internal static class Log
 {

@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 static class Paths
 {

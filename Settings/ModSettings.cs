@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using BepInEx;
 
-namespace Settings;
+namespace Silksong.Settings;
 
 record ModSettings(
     BaseUnityPlugin Plugin,
