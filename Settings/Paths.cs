@@ -27,7 +27,7 @@ public static class Paths
     //    => Plugin.Instance.ProfileSettings.DataFolderPath
 
     // TODO(Unavailable): "some sensible default idk" - BadMagic 2025
-    public static string DefaultUserDataPath =>
+    internal static string DefaultDataFolderPath =>
         Path.Combine(Application.persistentDataPath, "mod-data");
 
     static string SharedPathFolder()

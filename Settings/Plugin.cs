@@ -35,5 +35,5 @@ public partial class Plugin : BaseUnityPlugin, IProfileSettings<Settings>
 
 public record Settings
 {
-    public string UserDataPath { get; set; } = Paths.DefaultUserDataPath;
+    public string DataFolderPath { get; set; } = Paths.DefaultDataFolderPath;
 }
