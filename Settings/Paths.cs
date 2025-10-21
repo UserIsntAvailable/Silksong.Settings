@@ -1,15 +1,30 @@
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
 
 namespace Silksong.Settings;
 
-static class Paths
+public static class Paths
 {
     public static string ProfileFolderPath => BepInEx.Paths.ConfigPath;
 
-    [field: AllowNull]
-    public static string SharedFolderPath => field = field is null ? SharedPathFolder() : field;
+    // DOCS(Unavailable): Can be null if: 1) gets called inside `Awake()` or
+    // 2) dev didn't set `Silksong.Settings` as one of their dependencies, and
+    // their `Start()` method rans first that ours.
+    public static string? SharedFolderPath
+    {
+        get
+        {
+            if (!Plugin.Instance.didStart) return null;
+            return field = field is null ? SharedPathFolder() : field;
+        }
+    }
+
+    // TODO(Unavailable): Special case the loading of myself to happen in
+    // `Start()`; like that, mods can easily get `DataFolderPath` even
+    // before getting to `UIManager.Start`.
+    //
+    // public static string? DataFolderPath
+    //    => Plugin.Instance.ProfileSettings.DataFolderPath
 
     // TODO(Unavailable): "some sensible default idk" - BadMagic 2025
     public static string DefaultUserDataPath =>

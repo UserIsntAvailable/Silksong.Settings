@@ -10,6 +10,7 @@ public partial class Plugin : BaseUnityPlugin, IProfileSettings<Settings>
     Harmony _harmony = null!;
 
     internal static Plugin Instance = null!;
+
     // TODO(Unavailable): This doesn't need to be a `Dictionary` anymore.
     internal Dictionary<string, ModSettings> Settings = new();
 

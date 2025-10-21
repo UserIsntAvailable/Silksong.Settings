@@ -14,8 +14,6 @@ class Patches
     {
         Log.Debug("Loading Shared and Profile Settings");
 
-        // TODO(Unavailable): I should probably load this plugin's config first.
-
         foreach (var modSettings in Plugin.Instance.Settings.Values)
         {
             var plugin = modSettings.Plugin;
