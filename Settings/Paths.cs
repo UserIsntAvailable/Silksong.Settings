@@ -16,7 +16,7 @@ public static class Paths
         {
             // TODO(Unavailable): Wouldn't it be better to `throw`?
             if (!Plugin.Instance.didStart) return null;
-            return field ??= SharedPathFolder();
+            return field ??= ModSettingsFolderPath();
         }
     }
 
@@ -31,7 +31,7 @@ public static class Paths
     internal static string DefaultDataFolderPath =>
         Path.Combine(Application.persistentDataPath, "mod-data");
 
-    static string SharedPathFolder()
+    static string ModSettingsFolderPath()
     {
         var platform = Platform.Current as DesktopPlatform;
         var userId = platform?.onlineSubsystem?.UserId;

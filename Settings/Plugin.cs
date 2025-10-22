@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 namespace Silksong.Settings;
 
 [BepInAutoPlugin(id: "unavailable.settings")]
-public partial class Plugin : BaseUnityPlugin, IProfileSettings<Settings>
+public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
 {
     Harmony _harmony = null!;
 
@@ -30,8 +30,7 @@ public partial class Plugin : BaseUnityPlugin, IProfileSettings<Settings>
         Log.Debug($"{Settings.Keys.Count} discovered settings");
     }
 
-    // TODO(Unavailable): This should be `ISharedSettings`
-    public Settings ProfileSettings { get; set; } = new();
+    public Settings SharedSettings { get; set; } = new();
 }
 
 public record Settings
