@@ -34,18 +34,23 @@ public interface ISharedSettings<T>
 
 public interface IUserSettings<T>
 {
-    T UserSettings { get; set; }
-
-    /// Prevent from loading this user settings if the mod is not installed.
-    bool Critical { get => true; }
+    // Gets set to `null` when a save slot session is finished (notified by
+    // `OnFinishedSession`).
+    T? UserSettings { get; set; }
 
     void OnUserSettingsLoad(T settings)
     {
         UserSettings = settings;
     }
 
-    T OnUserSettingsSave()
+    T? OnUserSettingsSave()
     {
         return UserSettings;
     }
+
+    // Returns wether or not these settings are critical for the functionality
+    // of the save slot; if the mod attached to these settings is not installed
+    // when a new session is started, the loading of these settings would be
+    // prevented.
+    bool OnFinishedSession() => true;
 }
