@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using BepInEx;
+using BepInEx.Bootstrap;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -12,8 +14,7 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
 
     internal static Plugin Instance = null!;
 
-    // TODO(Unavailable): This doesn't need to be a `Dictionary` anymore.
-    internal Dictionary<string, ModSettings> Settings = new();
+    internal readonly List<ModSettings> Settings = [];
 
     void Awake()
     {
@@ -24,10 +25,25 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
         _harmony.PatchAll(typeof(Patches));
     }
 
+    [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
     void Start()
     {
-        Settings = Discovery.FindModSettings();
-        Log.Debug($"{Settings.Keys.Count} discovered settings");
+        foreach (var (guid, info) in Chainloader.PluginInfos)
+        {
+            if (info.Instance is not { } plugin)
+                continue;
+
+            var profile = plugin as IProfileSettings;
+            var shared = plugin as ISharedSettings;
+            var user = plugin as IUserSettings;
+
+            if (profile is null && shared is null && user is null)
+                continue;
+
+            Settings.Add(new(guid, profile, shared, user));
+        }
+
+        Log.Debug($"{Settings.Count} discovered settings");
     }
 
     public Settings SharedSettings { get; set; } = new();

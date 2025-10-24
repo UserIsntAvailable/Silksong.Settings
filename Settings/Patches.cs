@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using BepInEx;
 using HarmonyLib;
 using Silksong.Settings.Json;
 
@@ -14,14 +13,25 @@ static class Patches
     {
         Log.Debug("Loading Shared and Profile Settings");
 
-        foreach (var modSettings in Plugin.Instance.Settings.Values)
+        foreach (var modSettings in Plugin.Instance.Settings)
         {
-            var plugin = modSettings.Plugin;
+            var guid = modSettings.Guid;
 
-            if (modSettings.ProfileSettingsInvoker is { } profileInvoker)
-                InvokePluginLoad(modSettings.ProfileSettingsPath, plugin, profileInvoker);
-            if (modSettings.SharedSettingsInvoker is { } sharedInvoker)
-                InvokePluginLoad(modSettings.SharedSettingsPath, plugin, sharedInvoker);
+            if (modSettings.Profile is { } profile)
+                LoadModSettings(
+                    modSettings.ProfileSettingsPath,
+                    guid,
+                    profile.ProfileSettingsType,
+                    profile.OnProfileSettingsLoadUntyped
+                );
+
+            if (modSettings.Shared is { } shared)
+                LoadModSettings(
+                    modSettings.SharedSettingsPath,
+                    guid,
+                    shared.SharedSettingsType,
+                    shared.OnSharedSettingsLoadUntyped
+                );
         }
     }
 
@@ -33,31 +43,40 @@ static class Patches
 
         Log.Debug("Saving Shared and Profile Settings");
 
-        foreach (var modSettings in Plugin.Instance.Settings.Values)
+        foreach (var modSettings in Plugin.Instance.Settings)
         {
-            var plugin = modSettings.Plugin;
+            var guid = modSettings.Guid;
 
-            if (modSettings.ProfileSettingsInvoker is { } profileInvoker)
-                InvokePluginSave(modSettings.ProfileSettingsPath, plugin, profileInvoker);
-            if (modSettings.SharedSettingsInvoker is { } sharedInvoker)
-                InvokePluginSave(modSettings.SharedSettingsPath, plugin, sharedInvoker);
+            if (modSettings.Profile is { } profile)
+                SaveModSettings(
+                    modSettings.ProfileSettingsPath,
+                    guid,
+                    profile.ProfileSettingsType,
+                    profile.OnProfileSettingsSaveUntyped
+                );
+
+            if (modSettings.Shared is { } shared)
+                SaveModSettings(
+                    modSettings.SharedSettingsPath,
+                    guid,
+                    shared.SharedSettingsType,
+                    shared.OnSharedSettingsSaveUntyped
+                );
         }
     }
 
-    static void InvokePluginLoad(string path, BaseUnityPlugin plugin, SettingsInvoker invoker)
+    static void LoadModSettings(string path, string guid, Type settingsType, Action<object> onLoad)
     {
         try
         {
-            var settingsType = invoker.SettingsType;
-
             if (!File.Exists(path)) return;
             if (Utils.TryLoadJson(path, settingsType, out var obj))
             {
-                invoker.OnSettingsLoad.Invoke(plugin, obj);
+                onLoad(obj);
                 return;
             }
 
-            Log.Error($"Null settings passed to {plugin.Info.Metadata.GUID}");
+            Log.Error($"Failed to load '{settingsType.Name}' settings from {guid}");
 
             var backupPath = path + ".bak";
             if (!File.Exists(backupPath)) return;
@@ -65,11 +84,11 @@ static class Patches
             {
                 File.Delete(path);
                 File.Copy(backupPath, path);
-                invoker.OnSettingsLoad.Invoke(plugin, obj);
+                onLoad(obj);
                 return;
             }
 
-            Log.Error("Failed to load settings from backup");
+            Log.Error($"Failed to load '{settingsType.Name}' settings from backup");
         }
         catch (Exception e)
         {
@@ -77,20 +96,18 @@ static class Patches
         }
     }
 
-    static void InvokePluginSave(string path, BaseUnityPlugin plugin, SettingsInvoker invoker)
+    static void SaveModSettings(string path, string guid, Type settingsType, Func<object?> onSave)
     {
         try
         {
-            var obj = invoker.OnSettingsSave.Invoke(plugin);
-            if (obj is null) return;
+            if (onSave() is not { } obj) return;
 
             var backupPath = path + ".bak";
             if (File.Exists(backupPath)) File.Delete(backupPath);
             if (File.Exists(path)) File.Move(path, backupPath);
-
             if (Utils.TrySaveJson(path, obj)) return;
 
-            Log.Error("Failed to save settings");
+            Log.Error($"Failed to save '{settingsType.Name}' settings from '{guid}'");
         }
         catch (Exception e)
         {
