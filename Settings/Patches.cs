@@ -5,11 +5,11 @@ using Silksong.Settings.Json;
 
 namespace Silksong.Settings;
 
-static class Patches
+internal static class Patches
 {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(UIManager), nameof(UIManager.Start))]
-    static void LoadSharedAndProfileSettings()
+    private static void LoadSharedAndProfileSettings()
     {
         Log.Debug("Loading Shared and Profile Settings");
 
@@ -37,9 +37,9 @@ static class Patches
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameManager), nameof(GameManager.OnApplicationQuit))]
-    static void SaveSharedAndProfileSettings()
+    private static void SaveSharedAndProfileSettings()
     {
-        Directory.CreateDirectory(Paths.SharedFolderPath);
+        _ = Directory.CreateDirectory(Paths.SharedFolderPath);
 
         Log.Debug("Saving Shared and Profile Settings");
 
@@ -74,7 +74,9 @@ static class Patches
     {
         try
         {
-            if (!File.Exists(path)) return;
+            if (!File.Exists(path))
+                return;
+
             if (Utils.TryLoadJson(path, settingsType, out var obj))
             {
                 onLoad(obj);
@@ -84,7 +86,9 @@ static class Patches
             Log.Error($"Failed to load '{settingsType.Name}' settings from {guid}");
 
             var backupPath = path + ".bak";
-            if (!File.Exists(backupPath)) return;
+            if (!File.Exists(backupPath))
+                return;
+
             if (Utils.TryLoadJson(backupPath, settingsType, out obj))
             {
                 File.Delete(path);
@@ -110,12 +114,19 @@ static class Patches
     {
         try
         {
-            if (onSave() is not { } obj) return;
+            if (onSave() is not { } obj)
+                return;
 
             var backupPath = path + ".bak";
-            if (File.Exists(backupPath)) File.Delete(backupPath);
-            if (File.Exists(path)) File.Move(path, backupPath);
-            if (Utils.TrySaveJson(path, obj)) return;
+
+            if (File.Exists(backupPath))
+                File.Delete(backupPath);
+
+            if (File.Exists(path))
+                File.Move(path, backupPath);
+
+            if (Utils.TrySaveJson(path, obj))
+                return;
 
             Log.Error($"Failed to save '{settingsType.Name}' settings from '{guid}'");
         }

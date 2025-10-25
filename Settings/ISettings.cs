@@ -1,8 +1,9 @@
 using System;
-using TeamCherry.GameCore;
+using JetBrains.Annotations;
 
 namespace Silksong.Settings;
 
+[PublicAPI]
 public interface IProfileSettings<T> : IProfileSettings
 {
     T ProfileSettings { get; set; }
@@ -20,6 +21,7 @@ public interface IProfileSettings<T> : IProfileSettings
     object IProfileSettings.OnProfileSettingsSaveUntyped() => OnProfileSettingsSave()!;
 }
 
+[PublicAPI]
 public interface ISharedSettings<T> : ISharedSettings
 {
     T SharedSettings { get; set; }
@@ -37,6 +39,7 @@ public interface ISharedSettings<T> : ISharedSettings
     object ISharedSettings.OnSharedSettingsSaveUntyped() => OnSharedSettingsSave()!;
 }
 
+[PublicAPI]
 public interface IUserSettings<T> : IUserSettings
 {
     // Gets set to `null` when a save slot session is finished.
@@ -65,8 +68,8 @@ public interface IUserSettings<T> : IUserSettings
     bool IUserSettings.OnFinishedSessionUntyped() => OnFinishedSession();
 }
 
-// TODO(Unavailable): These can be hidden in another namespace +
-// [(Obsolete)] to prevent people from depending on these...
+// TODO(Unavailable): These can be hidden in another namespace + [(Obsolete)] to
+// prevent people from depending on these...
 
 public interface IProfileSettings
 {

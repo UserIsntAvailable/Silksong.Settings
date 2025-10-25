@@ -1,4 +1,5 @@
 using System.IO;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Silksong.Settings;
@@ -16,6 +17,7 @@ public static class Paths
 
     // DOCS(Unavailable): Explain why it can be null (read `ModSettingsPath()`
     // for context.
+    [PublicAPI]
     public static string? DataFolderPath =>
         Plugin.Instance.didStart ? Plugin.Instance.SharedSettings.DataFolderPath : null;
 
@@ -38,9 +40,9 @@ public static class Paths
     //
     // 4. Modding Analyzer.
     //
-    // For all this solutions it would still be valuable to provide docs
+    // For all these solutions, it would still be valuable to provide docs
     // explaining the behaviour of this.
-    static string ModSettingsPath()
+    private static string ModSettingsPath()
     {
         var platform = Platform.Current as DesktopPlatform;
         var modSettingsPath = Path.Combine(platform!.saveDirPath, "mod-settings");

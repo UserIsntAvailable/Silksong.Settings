@@ -3,20 +3,21 @@ using System.Diagnostics.CodeAnalysis;
 using BepInEx;
 using BepInEx.Bootstrap;
 using HarmonyLib;
+using JetBrains.Annotations;
 
 namespace Silksong.Settings;
 
 [BepInAutoPlugin(id: "unavailable.settings")]
 public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
 {
-    Harmony _harmony = null!;
-    ModSettings _modSettings = null!;
+    private Harmony _harmony = null!;
+    private ModSettings _modSettings = null!;
 
-    internal static Plugin Instance = null!;
+    internal static Plugin Instance { get; private set; } = null!;
 
     internal readonly List<ModSettings> Settings = [];
 
-    void Awake()
+    private void Awake()
     {
         Log.Debug("Mod loaded");
 
@@ -26,7 +27,7 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
     }
 
     [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
-    void Start()
+    private void Start()
     {
         foreach (var (guid, info) in Chainloader.PluginInfos)
         {
@@ -46,7 +47,10 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
                 _modSettings = modSettings;
                 // Shared settings are specially handled to load `DataFolderPath`
                 // before `Patches.LoadSharedAndProfileSettings`.
-                modSettings = modSettings with { Shared = null };
+                modSettings = modSettings with
+                {
+                    Shared = null,
+                };
             }
 
             Settings.Add(modSettings);
@@ -62,7 +66,7 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
         );
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         Patches.SaveModSettings(
             _modSettings.SharedSettingsPath,
@@ -77,5 +81,6 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
 
 public record Settings
 {
+    [PublicAPI]
     public string DataFolderPath { get; set; } = Paths.DefaultDataFolderPath;
 }

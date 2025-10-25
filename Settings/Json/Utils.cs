@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 
 namespace Silksong.Settings.Json;
 
-static class Utils
+internal static class Utils
 {
-    static readonly JsonSerializerSettings _settings = new()
+    private static readonly JsonSerializerSettings _settings = new()
     {
         ContractResolver = ShouldSerializeContractResolver.Instance,
         TypeNameHandling = TypeNameHandling.Auto,

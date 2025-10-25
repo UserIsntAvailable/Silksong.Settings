@@ -2,7 +2,7 @@ using System.IO;
 
 namespace Silksong.Settings;
 
-record ModSettings(
+internal record ModSettings(
     string Guid,
     IProfileSettings? Profile,
     ISharedSettings? Shared,
