@@ -13,7 +13,12 @@ public static class Paths
     public static string? SharedFolderPath =>
         Plugin.Instance.didStart ? field ??= ModSettingsPath() : null;
 
-    // TODO(Unavailable): UserFolderPath
+    // DOCS(Unavailable): Explain why it can be null (read `ModSettingsPath()`
+    // for context.
+    public static string? UserSettingsPath(int slot) =>
+        SharedFolderPath is null
+            ? null
+            : Path.Combine(SharedFolderPath, $"user{slot}-modded");
 
     // DOCS(Unavailable): Explain why it can be null (read `ModSettingsPath()`
     // for context.

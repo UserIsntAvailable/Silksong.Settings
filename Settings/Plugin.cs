@@ -58,23 +58,16 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
 
         Log.Debug($"{Settings.Count} discovered settings");
 
-        Patches.LoadModSettings(
-            _modSettings.SharedSettingsPath,
-            Id,
-            _modSettings.Shared!.SharedSettingsType,
-            _modSettings.Shared!.OnSharedSettingsLoadUntyped
-        );
+        _modSettings.LoadShared();
     }
 
-    private void OnDestroy()
+    void ISharedSettings<Settings>.OnSharedSettingsLoad(Settings settings)
     {
-        Patches.SaveModSettings(
-            _modSettings.SharedSettingsPath,
-            Id,
-            _modSettings.Shared!.SharedSettingsType,
-            _modSettings.Shared!.OnSharedSettingsSaveUntyped
-        );
+        Log.Debug($"Data directory found at: {settings.DataFolderPath}");
+        SharedSettings = settings;
     }
+
+    private void OnDestroy() => _modSettings.SaveShared();
 
     public Settings SharedSettings { get; set; } = new();
 }
