@@ -65,7 +65,12 @@ static class Patches
         }
     }
 
-    static void LoadModSettings(string path, string guid, Type settingsType, Action<object> onLoad)
+    internal static void LoadModSettings(
+        string path,
+        string guid,
+        Type settingsType,
+        Action<object> onLoad
+    )
     {
         try
         {
@@ -96,7 +101,12 @@ static class Patches
         }
     }
 
-    static void SaveModSettings(string path, string guid, Type settingsType, Func<object?> onSave)
+    internal static void SaveModSettings(
+        string path,
+        string guid,
+        Type settingsType,
+        Func<object?> onSave
+    )
     {
         try
         {

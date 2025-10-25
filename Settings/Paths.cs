@@ -7,36 +7,43 @@ public static class Paths
 {
     public static string ProfileFolderPath => BepInEx.Paths.ConfigPath;
 
-    // DOCS(Unavailable): Can be null if: 1) gets called inside `Awake()` or
-    // 2) dev didn't set `Silksong.Settings` as one of their dependencies, and
-    // their `Start()` method ran first that ours.
-    public static string? SharedFolderPath
-    {
-        get
-        {
-            // TODO(Unavailable): Wouldn't it be better to `throw`?
-            if (!Plugin.Instance.didStart) return null;
-            return field ??= ModSettingsFolderPath();
-        }
-    }
+    // DOCS(Unavailable): Explain why it can be null (read `ModSettingsPath()`
+    // for context.
+    public static string? SharedFolderPath =>
+        Plugin.Instance.didStart ? field ??= ModSettingsPath() : null;
 
-    // TODO(Unavailable): Special case the loading of myself to happen in
-    // `Start()`; like that, mods can easily get `DataFolderPath` even
-    // before getting to `UIManager.Start`.
-    //
-    // public static string? DataFolderPath
-    //    => Plugin.Instance.ProfileSettings.DataFolderPath
+    // TODO(Unavailable): UserFolderPath
+
+    // DOCS(Unavailable): Explain why it can be null (read `ModSettingsPath()`
+    // for context.
+    public static string? DataFolderPath =>
+        Plugin.Instance.didStart ? Plugin.Instance.SharedSettings.DataFolderPath : null;
 
     // TODO(Unavailable): "some sensible default idk" - BadMagic 2025
     internal static string DefaultDataFolderPath =>
         Path.Combine(Application.persistentDataPath, "mod-data");
 
-    static string ModSettingsFolderPath()
+    // This shouldn't be called in `Awake()`, since `SteamOnlineSubsystem` would
+    // have not run yet, which would make `saveDirPath` point to the "default"
+    // folder path. Other than returning `null` for the `*FolderPath` methods
+    // there are two possible solutions for this:
+    //
+    // 1. `throw` instead of `?`.
+    //
+    // 2. Change the modding template to use `Start()` over `Awake()`, since in
+    // theory it doesn't really matter which one is used.
+    //
+    // 3. Preload/Patch `SteamOnlineSubsystem` so that it runs before `BepInEx`
+    // Chainloader.
+    //
+    // 4. Modding Analyzer.
+    //
+    // For all this solutions it would still be valuable to provide docs
+    // explaining the behaviour of this.
+    static string ModSettingsPath()
     {
         var platform = Platform.Current as DesktopPlatform;
-        var userId = platform?.onlineSubsystem?.UserId;
-        var accId = string.IsNullOrEmpty(userId) ? "default" : userId!;
-        var modSettingsPath = Path.Combine(Application.persistentDataPath, accId, "mod-settings");
+        var modSettingsPath = Path.Combine(platform!.saveDirPath, "mod-settings");
 
         Log.Debug($"Mod settings directory found at: {modSettingsPath}");
 
