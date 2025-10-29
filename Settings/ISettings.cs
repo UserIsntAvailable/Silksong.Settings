@@ -17,7 +17,6 @@ public interface IProfileSettings<T> : IProfileSettings
     void IProfileSettings.OnProfileSettingsLoadUntyped(object settings) =>
         OnProfileSettingsLoad((T)settings);
 
-    // FIXME(Unavailable): Possible null reference return???
     object IProfileSettings.OnProfileSettingsSaveUntyped() => OnProfileSettingsSave()!;
 }
 
@@ -35,7 +34,6 @@ public interface ISharedSettings<T> : ISharedSettings
     void ISharedSettings.OnSharedSettingsLoadUntyped(object settings) =>
         OnSharedSettingsLoad((T)settings);
 
-    // FIXME(Unavailable): Possible null reference return???
     object ISharedSettings.OnSharedSettingsSaveUntyped() => OnSharedSettingsSave()!;
 }
 
@@ -45,27 +43,31 @@ public interface IUserSettings<T> : IUserSettings
     // Gets set to `null` when a save slot session is finished.
     T? UserSettings { get; set; }
 
+    // Returns whether these settings are critical for the functionality of the
+    // save slot; if the mod attached to these settings is not installed when a
+    // new session is started, the loading of these settings would be prevented.
+    //
+    // Gets read by `DataManager` before saving the settings.
+    bool IsCritical => true;
+
     void OnUserSettingsLoad(T settings) => UserSettings = settings;
 
     T? OnUserSettingsSave() => UserSettings;
 
-    // Returns whether these settings are critical for the functionality of the
-    // save slot; if the mod attached to these settings is not installed when a
-    // new session is started, the loading of these settings would be prevented.
-    bool OnFinishedSession()
-    {
-        UserSettings = default;
-        return true;
-    }
-
     Type IUserSettings.UserSettingsType => typeof(T);
+
+    bool IUserSettings.IsCriticalUntyped => IsCritical;
+
+    object? IUserSettings.UserSettingsUntyped
+    {
+        get => UserSettings;
+        set => UserSettings = value == null ? default : (T)value;
+    }
 
     void IUserSettings.OnUserSettingsLoadUntyped(object settings) =>
         OnUserSettingsLoad((T)settings);
 
     object? IUserSettings.OnUserSettingsSaveUntyped() => OnUserSettingsSave();
-
-    bool IUserSettings.OnFinishedSessionUntyped() => OnFinishedSession();
 }
 
 // TODO(Unavailable): These can be hidden in another namespace + [(Obsolete)] to
@@ -93,9 +95,11 @@ public interface IUserSettings
 {
     Type UserSettingsType { get; }
 
+    bool IsCriticalUntyped { get; }
+
+    object? UserSettingsUntyped { get; set; }
+
     void OnUserSettingsLoadUntyped(object settings);
 
     object? OnUserSettingsSaveUntyped();
-
-    bool OnFinishedSessionUntyped();
 }

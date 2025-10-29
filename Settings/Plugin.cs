@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using BepInEx;
 using BepInEx.Bootstrap;
 using HarmonyLib;
@@ -8,7 +9,7 @@ using JetBrains.Annotations;
 namespace Silksong.Settings;
 
 [BepInAutoPlugin(id: "unavailable.settings")]
-public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
+public partial class Plugin : BaseUnityPlugin
 {
     private Harmony _harmony = null!;
     private ModSettings _modSettings = null!;
@@ -61,19 +62,48 @@ public partial class Plugin : BaseUnityPlugin, ISharedSettings<Settings>
         _modSettings.LoadShared();
     }
 
-    void ISharedSettings<Settings>.OnSharedSettingsLoad(Settings settings)
+    private void OnDestroy() => _modSettings.SaveShared();
+
+    internal List<string> MissingMods(int saveSlot)
+    {
+        _modSettings.LoadUser(saveSlot);
+        if (UserSettings?.CriticalUserSettings is not { } settings)
+            return [];
+
+        var missing = settings
+            .Where(x => x.Value && !Chainloader.PluginInfos.ContainsKey(x.Key))
+            .Select(x => x.Key)
+            .ToList();
+        UserSettings = null;
+        return missing;
+    }
+}
+
+// Plugin's Settings
+
+public partial class Plugin : ISharedSettings<SharedSettings>, IUserSettings<UserSettings>
+{
+    public SharedSettings SharedSettings { get; set; } = new();
+
+    public UserSettings? UserSettings { get; set; }
+
+    bool IUserSettings<UserSettings>.IsCritical => false;
+
+    void ISharedSettings<SharedSettings>.OnSharedSettingsLoad(SharedSettings settings)
     {
         Log.Debug($"Data directory found at: {settings.DataFolderPath}");
         SharedSettings = settings;
     }
-
-    private void OnDestroy() => _modSettings.SaveShared();
-
-    public Settings SharedSettings { get; set; } = new();
 }
 
-public record Settings
+public record SharedSettings
 {
     [PublicAPI]
     public string DataFolderPath { get; set; } = Paths.DefaultDataFolderPath;
+}
+
+public record UserSettings
+{
+    [PublicAPI]
+    public Dictionary<string, bool> CriticalUserSettings { get; set; } = [];
 }

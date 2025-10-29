@@ -95,7 +95,9 @@ internal record ModSettings(
 
     # region LoadSaveJson
 
-    // TODO(Unavailable): I should probably put these somewhere else...
+    // FIXME(Unavailable): Should these be public somewhere else? Maybe also
+    // with a modified API?
+
     private static void LoadJson(string path, string guid, Type settingsType, Action<object> onLoad)
     {
         try

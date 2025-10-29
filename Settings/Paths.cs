@@ -26,14 +26,16 @@ public static class Paths
     public static string? DataFolderPath =>
         Plugin.Instance.didStart ? Plugin.Instance.SharedSettings.DataFolderPath : null;
 
-    // TODO(Unavailable): "some sensible default idk" - BadMagic 2025
+    // FIXME(Unavailable): "some sensible default idk" - BadMagic 2025
     internal static string DefaultDataFolderPath =>
         Path.Combine(Application.persistentDataPath, "mod-data");
 
+    // FIXME(Unavailable):
+    //
     // This shouldn't be called in `Awake()`, since `SteamOnlineSubsystem` would
     // have not run yet, which would make `saveDirPath` point to the "default"
     // folder path. Other than returning `null` for the `*FolderPath` methods
-    // there are two possible solutions for this:
+    // these are the possible solutions (or mix of them):
     //
     // 1. `throw` instead of `?`.
     //
@@ -44,9 +46,6 @@ public static class Paths
     // Chainloader.
     //
     // 4. Modding Analyzer.
-    //
-    // For all these solutions, it would still be valuable to provide docs
-    // explaining the behaviour of this.
     private static string ModSettingsPath()
     {
         var platform = Platform.Current as DesktopPlatform;
