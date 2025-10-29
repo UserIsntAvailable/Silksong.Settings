@@ -49,23 +49,18 @@ public interface IUserSettings<T> : IUserSettings
 
     T? OnUserSettingsSave() => UserSettings;
 
-    // Returns whether these settings are critical for the functionality of the
-    // save slot; if the mod attached to these settings is not installed when a
-    // new session is started, the loading of these settings would be prevented.
-    bool OnFinishedSession()
-    {
-        UserSettings = default;
-        return true;
-    }
-
     Type IUserSettings.UserSettingsType => typeof(T);
+
+    object? IUserSettings.UserSettingsUntyped
+    {
+        get => UserSettings;
+        set => UserSettings = value == null ? default : (T)value;
+    }
 
     void IUserSettings.OnUserSettingsLoadUntyped(object settings) =>
         OnUserSettingsLoad((T)settings);
 
     object? IUserSettings.OnUserSettingsSaveUntyped() => OnUserSettingsSave();
-
-    bool IUserSettings.OnFinishedSessionUntyped() => OnFinishedSession();
 }
 
 // TODO(Unavailable): These can be hidden in another namespace + [(Obsolete)] to
@@ -93,9 +88,9 @@ public interface IUserSettings
 {
     Type UserSettingsType { get; }
 
+    object? UserSettingsUntyped { get; set; }
+
     void OnUserSettingsLoadUntyped(object settings);
 
     object? OnUserSettingsSaveUntyped();
-
-    bool OnFinishedSessionUntyped();
 }
