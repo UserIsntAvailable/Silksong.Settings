@@ -38,7 +38,6 @@ internal static class Patches
     // Copyright notice from `dpinela/DataManager`:
     //
     // Licensed under the EUPL-1.2
-    // Copyright (c) 2025 silksong-modding
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SaveSlotButton), nameof(SaveSlotButton.ProcessSaveStats))]
     private static bool CheckCriticalUserSettingsStats(
@@ -93,11 +92,17 @@ internal static class Patches
     )]
     private static void SaveUserSettings(int saveSlot, ref Action<bool> ogCallback)
     {
+        if (!Platform.IsSaveSlotIndexValid(saveSlot))
+            return;
+
         var ogCallbackCopy = ogCallback;
         ogCallback = (didSave) =>
         {
             ogCallbackCopy(didSave);
 
+            // FIXME(Unavailable): I think it is a good idea to not save any
+            // settings if saving the original save slot data fails, but I'm
+            // not really sure about it.
             if (didSave)
             {
                 Log.Debug($"Saving User Settings for Save Slot '{saveSlot}'");
@@ -119,6 +124,34 @@ internal static class Patches
         };
     }
 
-    // TODO(Unavailable): This should happen on `GameManager.ReturnToMainMenu`
-    private static void SetModUserSettingsToNull() { }
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GameManager), nameof(GameManager.ReturnToMainMenu))]
+    private static void SetModUserSettingsToNull(ref Action<bool> callback)
+    {
+        var callbackCopy = callback;
+        callback = (saveCompleteValue) =>
+        {
+            callbackCopy(saveCompleteValue);
+
+            Log.Debug("User Settings Session Finished");
+            foreach (var modSettings in Plugin.Instance.Settings)
+                if (modSettings.User is { } user)
+                    user.UserSettingsUntyped = null;
+        };
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameManager), nameof(GameManager.ClearSaveFile))]
+    private static void ClearUserSettings(int saveSlot)
+    {
+        if (!Platform.IsSaveSlotIndexValid(saveSlot))
+            return;
+
+        var userSettingsFolder = Paths.UserSettingsPath(saveSlot)!;
+        if (Directory.Exists(userSettingsFolder))
+        {
+            Log.Debug($"Clearing User Settings for Save Slot '{saveSlot}'");
+            Directory.Delete(userSettingsFolder, true);
+        }
+    }
 }
