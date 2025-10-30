@@ -7,6 +7,8 @@ namespace Silksong.Settings;
 
 internal static class Patches
 {
+    // FIXME(Unavailable): Loading should happen sooner (in hk-mapi it was as
+    // soon as the game opened).
     [HarmonyPostfix]
     [HarmonyPatch(typeof(UIManager), nameof(UIManager.Start))]
     private static void LoadSharedAndProfileSettings()
@@ -73,8 +75,9 @@ internal static class Patches
     )]
     private static void LoadUserSettings(int saveSlot)
     {
-        if (!Platform.IsSaveSlotIndexValid(saveSlot))
-            return;
+        // FIXME(Unavailable): Should this also be called on `StartNewGame`? We
+        // know for a fact that no user settings files should exist when that is
+        // called.
 
         _ = Directory.CreateDirectory(Paths.UserSettingsPath(saveSlot)!);
 
@@ -93,9 +96,6 @@ internal static class Patches
     // TODO(Unavailable): Implement "Restore_Points" functionality.
     private static void SaveUserSettings(int saveSlot, ref Action<bool> ogCallback)
     {
-        if (!Platform.IsSaveSlotIndexValid(saveSlot))
-            return;
-
         var ogCallbackCopy = ogCallback;
         ogCallback = (didSave) =>
         {
@@ -145,9 +145,6 @@ internal static class Patches
     [HarmonyPatch(typeof(GameManager), nameof(GameManager.ClearSaveFile))]
     private static void ClearUserSettings(int saveSlot)
     {
-        if (!Platform.IsSaveSlotIndexValid(saveSlot))
-            return;
-
         var userSettingsFolder = Paths.UserSettingsPath(saveSlot)!;
         if (Directory.Exists(userSettingsFolder))
         {
