@@ -26,6 +26,9 @@ internal static class Patches
     [HarmonyPatch(typeof(GameManager), nameof(GameManager.OnApplicationQuit))]
     private static void SaveSharedAndProfileSettings()
     {
+        // TODO(Unavailable): It would probably be a good idea to create this
+        // directory on Plugin's `Start()`, like that other mods don't need to
+        // check if the folder exists.
         _ = Directory.CreateDirectory(Paths.SharedFolderPath!);
 
         Log.Debug("Saving Shared and Profile Settings");
@@ -75,11 +78,12 @@ internal static class Patches
     )]
     private static void LoadUserSettings(int saveSlot)
     {
+        if (saveSlot == 0)
+            return;
+
         // FIXME(Unavailable): Should this also be called on `StartNewGame`? We
         // know for a fact that no user settings files should exist when that is
         // called.
-
-        _ = Directory.CreateDirectory(Paths.UserSettingsPath(saveSlot)!);
 
         Log.Debug($"Loading User Settings for Save Slot '{saveSlot}'");
 
@@ -96,6 +100,9 @@ internal static class Patches
     // TODO(Unavailable): Implement "Restore_Points" functionality.
     private static void SaveUserSettings(int saveSlot, ref Action<bool> ogCallback)
     {
+        if (saveSlot == 0)
+            return;
+
         var ogCallbackCopy = ogCallback;
         ogCallback = (didSave) =>
         {
@@ -107,8 +114,6 @@ internal static class Patches
             if (!didSave)
                 return;
 
-            Log.Debug($"Saving User Settings for Save Slot '{saveSlot}'");
-
             var settings = Plugin.Instance.Settings;
 
             foreach (var modSettings in settings)
@@ -119,6 +124,10 @@ internal static class Patches
                     userSettings.CriticalUserSettings[modSettings.Guid] = true;
                 }
             }
+
+            _ = Directory.CreateDirectory(Paths.UserSettingsPath(saveSlot)!);
+
+            Log.Debug($"Saving User Settings for Save Slot '{saveSlot}'");
 
             foreach (var modSettings in settings)
                 modSettings.SaveUser(saveSlot);
@@ -145,6 +154,9 @@ internal static class Patches
     [HarmonyPatch(typeof(GameManager), nameof(GameManager.ClearSaveFile))]
     private static void ClearUserSettings(int saveSlot)
     {
+        if (saveSlot == 0)
+            return;
+
         var userSettingsFolder = Paths.UserSettingsPath(saveSlot)!;
         if (Directory.Exists(userSettingsFolder))
         {
