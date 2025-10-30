@@ -11,7 +11,6 @@ internal static class Utils
         ContractResolver = ShouldSerializeContractResolver.Instance,
         TypeNameHandling = TypeNameHandling.Auto,
         ObjectCreationHandling = ObjectCreationHandling.Replace,
-        // TODO(Unavailable): Bring back `JsonConverterTypes`?
         Converters = [new Vector2Converter(), new Vector3Converter()],
     };
 

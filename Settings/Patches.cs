@@ -35,7 +35,7 @@ internal static class Patches
         }
     }
 
-    // Code modified from `dpinela/DataManager`. Copyright notice:
+    // Copyright notice from `dpinela/DataManager`:
     //
     // Licensed under the EUPL-1.2
     // Copyright (c) 2025 silksong-modding
@@ -49,31 +49,23 @@ internal static class Patches
     )
     {
         var saveSlot = __instance.SaveSlotIndex;
-
-        if (!Platform.IsSaveSlotIndexValid(saveSlot))
-            return false;
-
-        var missing = Plugin.Instance.CriticalUserSettingsStatsForSlot(saveSlot);
-
-        if (missing.Count == 0)
+        var missingMods = Plugin.Instance.MissingMods(saveSlot);
+        if (missingMods.Count == 0)
+        {
             return true;
-
+        }
         Log.Debug($"save slot {saveSlot} has save data for missing mods:");
-        foreach (var m in missing)
+        foreach (var m in missingMods)
+        {
             Log.Debug(m);
-
+        }
         // to match the behavior of the original method
         CheatManager.LastErrorText = errorInfo;
         __instance.ChangeSaveFileState(SaveSlotButton.SaveFileStates.Incompatible, doAnimate);
         __result = true;
-
         return false;
     }
 
-    // Code modified from `dpinela/DataManager`. Copyright notice:
-    //
-    // Licensed under the EUPL-1.2
-    // Copyright (c) 2025 silksong-modding
     [HarmonyPostfix]
     [HarmonyPatch(
         typeof(GameManager),
@@ -104,13 +96,26 @@ internal static class Patches
         var ogCallbackCopy = ogCallback;
         ogCallback = (didSave) =>
         {
+            ogCallbackCopy(didSave);
+
             if (didSave)
             {
                 Log.Debug($"Saving User Settings for Save Slot '{saveSlot}'");
-                foreach (var modSettings in Plugin.Instance.Settings)
+
+                var settings = Plugin.Instance.Settings;
+
+                foreach (var modSettings in settings)
+                {
+                    if (modSettings.User is { } user && user.IsCriticalUntyped)
+                    {
+                        var userSettings = Plugin.Instance.UserSettings ??= new();
+                        userSettings.CriticalUserSettings[modSettings.Guid] = true;
+                    }
+                }
+
+                foreach (var modSettings in settings)
                     modSettings.SaveUser(saveSlot);
             }
-            ogCallbackCopy(didSave);
         };
     }
 

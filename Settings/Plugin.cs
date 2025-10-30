@@ -64,10 +64,8 @@ public partial class Plugin : BaseUnityPlugin
 
     private void OnDestroy() => _modSettings.SaveShared();
 
-    internal List<string> CriticalUserSettingsStatsForSlot(int saveSlot)
+    internal List<string> MissingMods(int saveSlot)
     {
-        // TODO(Unavailable): I think `Json/Utils` should be public in order
-        // to make it easier for people reading/writing files when using `Paths`.
         _modSettings.LoadUser(saveSlot);
         if (UserSettings?.CriticalUserSettings is not { } settings)
             return [];
@@ -88,6 +86,8 @@ public partial class Plugin : ISharedSettings<SharedSettings>, IUserSettings<Use
     public SharedSettings SharedSettings { get; set; } = new();
 
     public UserSettings? UserSettings { get; set; }
+
+    bool IUserSettings<UserSettings>.IsCritical => false;
 
     void ISharedSettings<SharedSettings>.OnSharedSettingsLoad(SharedSettings settings)
     {
