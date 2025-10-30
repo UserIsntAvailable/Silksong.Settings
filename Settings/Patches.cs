@@ -90,6 +90,7 @@ internal static class Patches
         nameof(GameManager.SaveGame),
         [typeof(int), typeof(Action<bool>), typeof(bool), typeof(AutoSaveName)]
     )]
+    // TODO(Unavailable): Implement "Restore_Points" functionality.
     private static void SaveUserSettings(int saveSlot, ref Action<bool> ogCallback)
     {
         if (!Platform.IsSaveSlotIndexValid(saveSlot))
@@ -98,29 +99,29 @@ internal static class Patches
         var ogCallbackCopy = ogCallback;
         ogCallback = (didSave) =>
         {
-            ogCallbackCopy(didSave);
+            ogCallbackCopy?.Invoke(didSave);
 
             // FIXME(Unavailable): I think it is a good idea to not save any
             // settings if saving the original save slot data fails, but I'm
             // not really sure about it.
-            if (didSave)
+            if (!didSave)
+                return;
+
+            Log.Debug($"Saving User Settings for Save Slot '{saveSlot}'");
+
+            var settings = Plugin.Instance.Settings;
+
+            foreach (var modSettings in settings)
             {
-                Log.Debug($"Saving User Settings for Save Slot '{saveSlot}'");
-
-                var settings = Plugin.Instance.Settings;
-
-                foreach (var modSettings in settings)
+                if (modSettings.User is { } user && user.IsCriticalUntyped)
                 {
-                    if (modSettings.User is { } user && user.IsCriticalUntyped)
-                    {
-                        var userSettings = Plugin.Instance.UserSettings ??= new();
-                        userSettings.CriticalUserSettings[modSettings.Guid] = true;
-                    }
+                    var userSettings = Plugin.Instance.UserSettings ??= new();
+                    userSettings.CriticalUserSettings[modSettings.Guid] = true;
                 }
-
-                foreach (var modSettings in settings)
-                    modSettings.SaveUser(saveSlot);
             }
+
+            foreach (var modSettings in settings)
+                modSettings.SaveUser(saveSlot);
         };
     }
 
@@ -131,7 +132,7 @@ internal static class Patches
         var callbackCopy = callback;
         callback = (saveCompleteValue) =>
         {
-            callbackCopy(saveCompleteValue);
+            callbackCopy?.Invoke(saveCompleteValue);
 
             Log.Debug("User Settings Session Finished");
             foreach (var modSettings in Plugin.Instance.Settings)
