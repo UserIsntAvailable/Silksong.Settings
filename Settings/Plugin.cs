@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using BepInEx;
 using BepInEx.Bootstrap;
@@ -35,6 +36,17 @@ public partial class Plugin : BaseUnityPlugin
         // Makes sure that `DataFolderPath` is loaded before everything else.
         _modSettings.LoadShared();
 
+        // Creating these here makes sure that mods doesn't need to check if
+        // these directories exist (well, anyone could erase them at runtime,
+        // but that shouldn't be expected).
+        _ = Directory.CreateDirectory(Paths.SharedFolderPath!);
+        _ = Directory.CreateDirectory(Paths.DataFolderPath!);
+
+        DiscoverSettings();
+    }
+
+    private void DiscoverSettings()
+    {
         // TODO(Unavailable): Would it be useful to order these by dependence
         // order? If A depends on B, then B's settings would load first.
         foreach (var (guid, info) in Chainloader.PluginInfos)
@@ -42,7 +54,7 @@ public partial class Plugin : BaseUnityPlugin
             if (
                 info.Instance is not { } plugin
                 || guid == Id
-                || !ModSettings.TryCreate(plugin, out modSettings)
+                || !ModSettings.TryCreate(plugin, out var modSettings)
             )
                 continue;
 

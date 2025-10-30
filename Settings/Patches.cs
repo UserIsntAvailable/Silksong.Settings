@@ -11,11 +11,6 @@ internal static class Patches
     [HarmonyPatch(typeof(GameManager), nameof(GameManager.OnApplicationQuit))]
     private static void SaveSharedAndProfileSettings()
     {
-        // TODO(Unavailable): It would probably be a good idea to create this
-        // directory on Plugin's `Start()`, like that other mods don't need to
-        // check if the folder exists.
-        _ = Directory.CreateDirectory(Paths.SharedFolderPath!);
-
         Log.Debug("Saving Shared and Profile Settings");
 
         foreach (var modSettings in Plugin.Instance.Settings)
@@ -66,7 +61,7 @@ internal static class Patches
         if (saveSlot == 0)
             return;
 
-        Log.Debug($"Loading User Settings for Save Slot '{saveSlot}'");
+        Log.Debug($"Loading User Settings for Save Slot {saveSlot}");
 
         foreach (var modSettings in Plugin.Instance.Settings)
             modSettings.LoadUser(saveSlot);
@@ -108,7 +103,7 @@ internal static class Patches
 
             _ = Directory.CreateDirectory(Paths.UserSettingsPath(saveSlot)!);
 
-            Log.Debug($"Saving User Settings for Save Slot '{saveSlot}'");
+            Log.Debug($"Saving User Settings for Save Slot {saveSlot}");
 
             foreach (var modSettings in settings)
                 modSettings.SaveUser(saveSlot);
@@ -124,7 +119,7 @@ internal static class Patches
         {
             callbackCopy?.Invoke(saveCompleteValue);
 
-            Log.Debug("User Settings Session Finished");
+            Log.Debug("Returning to main menu. Zeroing out all User Settings");
             foreach (var modSettings in Plugin.Instance.Settings)
                 if (modSettings.User is { } user)
                     user.UserSettingsUntyped = null;
@@ -142,7 +137,7 @@ internal static class Patches
         if (!Directory.Exists(userSettingsFolder))
             return;
 
-        Log.Debug($"Clearing User Settings for Save Slot '{saveSlot}'");
+        Log.Debug($"Clearing User Settings for Save Slot {saveSlot}");
         Directory.Delete(userSettingsFolder, true);
     }
 }

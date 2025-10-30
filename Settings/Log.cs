@@ -16,6 +16,6 @@ internal static class Log
 
     internal static void Exception(Exception e)
     {
-        UnityEngine.Debug.LogError($"[{Plugin.Name}] {e}");
+        UnityEngine.Debug.LogError($"[{Plugin.Name}] {e.Message}");
     }
 }

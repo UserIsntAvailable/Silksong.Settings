@@ -40,12 +40,12 @@ public interface ISharedSettings<T> : ISharedSettings
 [PublicAPI]
 public interface IUserSettings<T> : IUserSettings
 {
-    // Gets set to `null` when a save slot session is finished.
+    // Gets set to `null` when returning to the main menu.
     T? UserSettings { get; set; }
 
     // Returns whether these settings are critical for the functionality of the
-    // save slot; if the mod attached to these settings is not installed when a
-    // new session is started, the loading of these settings would be prevented.
+    // save slot; the save slot would be unusable if the mod attached to these
+    // settings is not installed.
     //
     // Gets read by `DataManager` before saving the settings.
     bool IsCritical => true;
