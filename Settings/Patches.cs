@@ -66,10 +66,6 @@ internal static class Patches
         if (saveSlot == 0)
             return;
 
-        // FIXME(Unavailable): Should this also be called on `StartNewGame`? We
-        // know for a fact that no user settings files should exist when that is
-        // called.
-
         Log.Debug($"Loading User Settings for Save Slot '{saveSlot}'");
 
         foreach (var modSettings in Plugin.Instance.Settings)
@@ -103,11 +99,11 @@ internal static class Patches
 
             foreach (var modSettings in settings)
             {
-                if (modSettings.User is { } user && user.IsCriticalUntyped)
-                {
-                    var userSettings = Plugin.Instance.UserSettings ??= new();
-                    userSettings.CriticalUserSettings[modSettings.Guid] = true;
-                }
+                if (modSettings.User is not { } user)
+                    continue;
+
+                var userSettings = Plugin.Instance.UserSettings ??= new();
+                userSettings.CriticalUserSettings[modSettings.Guid] = user.IsCriticalUntyped;
             }
 
             _ = Directory.CreateDirectory(Paths.UserSettingsPath(saveSlot)!);
@@ -143,10 +139,10 @@ internal static class Patches
             return;
 
         var userSettingsFolder = Paths.UserSettingsPath(saveSlot)!;
-        if (Directory.Exists(userSettingsFolder))
-        {
-            Log.Debug($"Clearing User Settings for Save Slot '{saveSlot}'");
-            Directory.Delete(userSettingsFolder, true);
-        }
+        if (!Directory.Exists(userSettingsFolder))
+            return;
+
+        Log.Debug($"Clearing User Settings for Save Slot '{saveSlot}'");
+        Directory.Delete(userSettingsFolder, true);
     }
 }

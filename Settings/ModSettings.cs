@@ -55,6 +55,8 @@ internal record ModSettings(
 
     internal void LoadShared()
     {
+        // TODO(Unavailable): Do something about shared overrides.
+
         if (Shared is not null)
             LoadJson(
                 SharedSettingsPath(),
@@ -113,7 +115,7 @@ internal record ModSettings(
 
     # region LoadSaveJson
 
-    // FIXME(Unavailable): Should these be public somewhere else? Maybe also
+    // TODO(Unavailable): Should these be public somewhere else? Maybe also
     // with a modified API?
 
     private static void LoadJson(string path, string guid, Type settingsType, Action<object> onLoad)
