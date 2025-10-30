@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using BepInEx;
 using BepInEx.Bootstrap;
@@ -27,42 +26,33 @@ public partial class Plugin : BaseUnityPlugin
         _harmony.PatchAll(typeof(Patches));
     }
 
-    [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
     private void Start()
     {
+        _ = ModSettings.TryCreate(this, out var modSettings);
+        _modSettings = modSettings;
+        Settings.Add(_modSettings);
+
+        // Makes sure that `DataFolderPath` is loaded before everything else.
+        _modSettings.LoadShared();
+
+        // TODO(Unavailable): Would it be useful to order these by dependence
+        // order? If A depends on B, then B's settings would load first.
         foreach (var (guid, info) in Chainloader.PluginInfos)
         {
-            if (info.Instance is not { } plugin)
+            if (
+                info.Instance is not { } plugin
+                || guid == Id
+                || !ModSettings.TryCreate(plugin, out modSettings)
+            )
                 continue;
 
-            var profile = plugin as IProfileSettings;
-            var shared = plugin as ISharedSettings;
-            var user = plugin as IUserSettings;
-
-            if (profile is null && shared is null && user is null)
-                continue;
-
-            ModSettings modSettings = new(guid, profile, shared, user);
-            if (guid == Id)
-            {
-                _modSettings = modSettings;
-                // Shared settings are specially handled to load `DataFolderPath`
-                // before `Patches.LoadSharedAndProfileSettings`.
-                modSettings = modSettings with
-                {
-                    Shared = null,
-                };
-            }
-
+            modSettings.LoadProfile();
+            modSettings.LoadShared();
             Settings.Add(modSettings);
         }
 
         Log.Debug($"{Settings.Count} discovered settings");
-
-        _modSettings.LoadShared();
     }
-
-    private void OnDestroy() => _modSettings.SaveShared();
 
     internal List<string> MissingMods(int saveSlot)
     {

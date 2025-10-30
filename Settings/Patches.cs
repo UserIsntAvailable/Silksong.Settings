@@ -7,21 +7,6 @@ namespace Silksong.Settings;
 
 internal static class Patches
 {
-    // FIXME(Unavailable): Loading should happen sooner (in hk-mapi it was as
-    // soon as the game opened).
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(UIManager), nameof(UIManager.Start))]
-    private static void LoadSharedAndProfileSettings()
-    {
-        Log.Debug("Loading Shared and Profile Settings");
-
-        foreach (var modSettings in Plugin.Instance.Settings)
-        {
-            modSettings.LoadProfile();
-            modSettings.LoadShared();
-        }
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameManager), nameof(GameManager.OnApplicationQuit))]
     private static void SaveSharedAndProfileSettings()

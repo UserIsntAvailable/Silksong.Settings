@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using BepInEx;
 using Silksong.Settings.Json;
 
 namespace Silksong.Settings;
@@ -11,6 +13,22 @@ internal record ModSettings(
     IUserSettings? User
 )
 {
+    [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
+    internal static bool TryCreate(BaseUnityPlugin plugin, out ModSettings instance)
+    {
+        instance = null!;
+
+        var profile = plugin as IProfileSettings;
+        var shared = plugin as ISharedSettings;
+        var user = plugin as IUserSettings;
+
+        if (profile is null && shared is null && user is null)
+            return false;
+
+        instance = new(plugin.Info.Metadata.GUID, profile, shared, user);
+        return true;
+    }
+
     #region LoadSaveSettings
 
     internal void LoadProfile()
